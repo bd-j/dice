@@ -1,0 +1,127 @@
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage{graphicx} % Required to insert images
+
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in 
+
+
+\linespread{1.1} % Line spacing
+
+% Set up the header and footer
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName} % Top left header
+\chead{\hmwkTitle} % Top center header
+\rhead{\firstxmark} % Top right header
+\lfoot{\lastxmark} % Bottom left footer
+\cfoot{} % Bottom center footer
+\rfoot{Page\ \thepage\ of\ \pageref{LastPage}} % Bottom right footer
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT STRUCTURE COMMANDS
+%	Skip this unless you know what you're doing
+%----------------------------------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------------------------------
+%	NAME AND CLASS SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\hmwkTitle}{Star Formation History Information Content of Spectra:  Cramer-Rao Bound} % Assignment title
+\newcommand{\hmwkDueDate}{} % Due date
+\newcommand{\hmwkClass}{} % Course/class
+\newcommand{\hmwkClassTime}{} % Class/lecture time
+\newcommand{\hmwkClassInstructor}{} % Teacher/lecturer
+\newcommand{\hmwkAuthorName}{B Johnson} % Your name
+
+
+
+
+\begin{document}
+
+\vspace{0.15in}
+
+\underline{\textsc{Introduction}}: 
+Knowledge of the star formation history of galaxies of differnt types at different redshifts would place strong constraints on theories of galaxy evolution.
+However, it is difficult to infer star formation histories on a galaxy by galaxy basis from the available observational data.
+Probably the most informative exisiting data are color magnitude diagrams of the stars comprising a galaxy.
+These data are expensive to collect, and its only possible for very nearby galaxies.
+The next most informative is probably integrated or integral field spectroscopy of galaxies.
+This data is far more plentiful.
+But we don't really know how well it tells us things....
+
+\underline{\textsc{Basics}}:
+We define SFH as the function 
+\begin{eqnarray}
+\mathrm{SFH} & \equiv & \psi(t, Z)
+\end{eqnarray}
+where $t$ is the lookback time,
+$Z$ is the metallicity,
+and $\psi$ is the mass of stars formed per unit lookback time and unit metallicity.
+Note that we use lookback time since it avoids some annoying axis reversals and simplifies notation.
+
+We use the basic equation of stellar population synthesis to describe the integrated spectrum $F_\lambda$ at time $T$ in terms of the SFH and other parameters.
+\begin{eqnarray}
+F_\lambda & = & \int_0^{t_{univ}} dt \, \int_{Z_{min}}^{Z_{max}} dZ \, \psi(t, Z) \, s_\lambda(t, Z) \, e^{-\tau_\lambda(t, Z)}
+\end{eqnarray}
+where $s_\lambda(t, Z)$ is the spectrum of a unit mass of stars of age $t$ and metallicity $Z$, and
+$\tau_\lambda(t, Z)$ is the \emph{effective} dust opacity towards stars of age $t$ and metallicity $Z$.
+
+In practice, this is approximated by a sum over disrete \emph{simple stellar populations} (SSPs).  
+These SSPs are the $s_\lambda(t, Z)$ for $J$ specific values of $t$ (indexed as $t_j$) and $K$ specific values $Z$ (indexed as $Z_k$).
+They are calculated using isochrones and stellar spectral libraries.
+The sum is then
+\begin{eqnarray}
+F_\lambda & = & \sum_{j=1}^J \, \sum_{k=1}}^{K} \, m_{j,k} \, s_{\lambda, j,k} \, e^{-\tau_{j,k}} \\
+s_{\lambda, j,k} & = & s_\lambda(t_j, Z_k)
+\end{eqnarray}
+where the $m_{j,k}$ are the masses or \emph{weights} of each SSP.  
+These weights are determined by $\psi(t, Z)$ and the SSP interpolation scheme,  and are constrained to be positive.
+They also fully specify the SFH.
+
+If we collapse the two indices $j, k$ into a single index $i \equiv j\cdot K + k$ and ignore dust then we can write this in matrix form
+\begin{eqnarray}
+F & = & M \, S
+\end{eqnarray}
+Assuming the SSP spectra $s_{i}$ to be linearly independent, $L < J\times K$, perfect knowledge of $F$ (the integrated spectrum), and no dust, 
+then this equation can be solved using standard linear algebra techniques.
+
+However, we do not know $F$ perfectly, and there is dust. 
+The question then is, given $L_\lambda$ to some known precision, how well can we constrain the $m_{j,k}$ values? 
+Alternatively, what signal to noise is required to constrain $m_{j,k}$ to a specified precision. 
+Another interesting question concerns the number of independent $m_{j,k}$ values that can be constrained to a given precision -- 
+that is, the time (and metallicity) resolution of the SFH that is acheivable for a given integrated spectrum.
+A clear and systematic answer to this question has not yet been given, though much excellent work in this direction has been done.
+
+
+\underline{\textsc{The Cramer-Rao bound}}:
+A complete answer is actually quite difficult, as one must somehow explore the full joint posterior probability distribution for the $m_{j,k}$, 
+which in general can be complex and depends on the SFH itself.
+Efforts have been made using non-negative matrix factorization of Monte Carlo samplings of the noise.
+
+However, we can obtain \emph{limits} on the acheivable accuracy.  
+We will do this using the Fisher Information Matrix and the associated Cramer-Rao bound.
+The Cramer- Rao bound is based on estimating the curvature of the posterior PDF from the derivatives of the likelihood (or posterior probability) function.
+It thus requires us to write down a likelihood and take its derivative.
+
+For simplicity, we are going to restrict ourselves (for the moment) to the case of no dust and a single metallicity, $K=1$.
+We write the likelihood as 
+\begin{eqnarray}
+\mathcal{L} & = & 
+\end{eqnarray}
+
+
+\end{document}
