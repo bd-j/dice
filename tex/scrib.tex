@@ -18,8 +18,8 @@
 
 % Set up the header and footer
 \pagestyle{fancy}
-\lhead{\hmwkAuthorName} % Top left header
-\chead{\hmwkTitle} % Top center header
+\lhead{\AuthorName} % Top left header
+\chead{\Title} % Top center header
 \rhead{\firstxmark} % Top right header
 \lfoot{\lastxmark} % Bottom left footer
 \cfoot{} % Bottom center footer
@@ -27,7 +27,12 @@
 \renewcommand\headrulewidth{0.4pt} % Size of the header rule
 \renewcommand\footrulewidth{0.4pt} % Size of the footer rule
 
+\setlength{\parskip}{\baselineskip}
 \setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.png,.pdf}
 
 %----------------------------------------------------------------------------------------
 %	DOCUMENT STRUCTURE COMMANDS
@@ -37,17 +42,15 @@
 
 
 %----------------------------------------------------------------------------------------
-%	NAME AND CLASS SECTION
+%	NAME AND Title
 %----------------------------------------------------------------------------------------
 
-\newcommand{\hmwkTitle}{Star Formation History Information Content of Spectra:  Cramer-Rao Bound} % Assignment title
-\newcommand{\hmwkDueDate}{} % Due date
-\newcommand{\hmwkClass}{} % Course/class
-\newcommand{\hmwkClassTime}{} % Class/lecture time
-\newcommand{\hmwkClassInstructor}{} % Teacher/lecturer
-\newcommand{\hmwkAuthorName}{B Johnson} % Your name
+\newcommand{\Title}{Star Formation History Information Content of Spectra:  Cramer-Rao Bound} % title
+\newcommand{\AuthorName}{B Johnson} % Your name
 
-
+\newcommand{\transpose}[1]{{#1}^{\!\mathsf T}}
+\newcommand{\given}{\,|\,}
+\renewcommand{\det}[1]{||{#1}||}
 
 
 \begin{document}
@@ -57,14 +60,20 @@
 \underline{\textsc{Introduction}}: 
 Knowledge of the star formation history of galaxies of differnt types at different redshifts would place strong constraints on theories of galaxy evolution.
 However, it is difficult to infer star formation histories on a galaxy by galaxy basis from the available observational data.
+
 Probably the most informative exisiting data are color magnitude diagrams of the stars comprising a galaxy.
 These data are expensive to collect, and its only possible for very nearby galaxies.
+
 The next most informative is probably integrated or integral field spectroscopy of galaxies.
 This data is far more plentiful.
 But we don't really know how well it tells us things....
+In particular, the spectra of of successive generations of stars or not extremely different, 
+which leads to the intuition that there should be large degeneracies in the masses stellar generations that are close in time.
 
-\underline{\textsc{Basics}}:
-We define SFH as the function 
+\vspace{0.15in}
+
+\underline{\textsc{SFH and SPS Basics}}:
+Here we're going to define some terms and introduce notation. We define SFH as the function 
 \begin{eqnarray}
 \mathrm{SFH} & \equiv & \psi(t, Z)
 \end{eqnarray}
@@ -80,48 +89,126 @@ F_\lambda & = & \int_0^{t_{univ}} dt \, \int_{Z_{min}}^{Z_{max}} dZ \, \psi(t, Z
 where $s_\lambda(t, Z)$ is the spectrum of a unit mass of stars of age $t$ and metallicity $Z$, and
 $\tau_\lambda(t, Z)$ is the \emph{effective} dust opacity towards stars of age $t$ and metallicity $Z$.
 
-In practice, this is approximated by a sum over disrete \emph{simple stellar populations} (SSPs).  
+In practice, this is approximated by a sum over discrete \emph{simple stellar populations} (SSPs).  
 These SSPs are the $s_\lambda(t, Z)$ for $J$ specific values of $t$ (indexed as $t_j$) and $K$ specific values $Z$ (indexed as $Z_k$).
 They are calculated using isochrones and stellar spectral libraries.
 The sum is then
 \begin{eqnarray}
-F_\lambda & = & \sum_{j=1}^J \, \sum_{k=1}}^{K} \, m_{j,k} \, s_{\lambda, j,k} \, e^{-\tau_{j,k}} \\
+F_\lambda & = & \sum_{j=1}^J \, \sum_{k=1}^{K} \, m_{j,k} \, s_{\lambda, j,k} \, e^{-\tau_{j,k}} \\
 s_{\lambda, j,k} & = & s_\lambda(t_j, Z_k)
 \end{eqnarray}
 where the $m_{j,k}$ are the masses or \emph{weights} of each SSP.  
 These weights are determined by $\psi(t, Z)$ and the SSP interpolation scheme,  and are constrained to be positive.
 They also fully specify the SFH.
 
+\vspace{0.15in}
+
+\underline{\textsc{Solving for the SFH}}:
 If we collapse the two indices $j, k$ into a single index $i \equiv j\cdot K + k$ and ignore dust then we can write this in matrix form
 \begin{eqnarray}
 F & = & M \, S
 \end{eqnarray}
-Assuming the SSP spectra $s_{i}$ to be linearly independent, $L < J\times K$, perfect knowledge of $F$ (the integrated spectrum), and no dust, 
-then this equation can be solved using standard linear algebra techniques.
+Assuming the SSP spectra $s_{i}$ are linearly independent and perfect, that $L > J\times K$, and that we have perfect knowledge of $F$ (the integrated spectrum), and that there is no dust, 
+then this equation can be solved for $M$ using standard linear algebra techniques.
 
 However, we do not know $F$ perfectly, and there is dust. 
-The question then is, given $L_\lambda$ to some known precision, how well can we constrain the $m_{j,k}$ values? 
-Alternatively, what signal to noise is required to constrain $m_{j,k}$ to a specified precision. 
+The question then is, given $F_\lambda$ to some known precision, how well can we constrain the $m_{j,k}$ values? 
+Alternatively, what signal to noise is required to constrain $m_{j,k}$ to a specified precision?
 Another interesting question concerns the number of independent $m_{j,k}$ values that can be constrained to a given precision -- 
 that is, the time (and metallicity) resolution of the SFH that is acheivable for a given integrated spectrum.
 A clear and systematic answer to this question has not yet been given, though much excellent work in this direction has been done.
 
-
-\underline{\textsc{The Cramer-Rao bound}}:
 A complete answer is actually quite difficult, as one must somehow explore the full joint posterior probability distribution for the $m_{j,k}$, 
 which in general can be complex and depends on the SFH itself.
-Efforts have been made using non-negative matrix factorization of Monte Carlo samplings of the noise.
+Efforts have been made using, for example, non-negative matrix factorization of Monte Carlo samplings of the noise, 
+but this can be time consuming, and the effects of different SFHs, wavelength range, spectral resolution, and S/N have not been fully explored.
 
-However, we can obtain \emph{limits} on the acheivable accuracy.  
-We will do this using the Fisher Information Matrix and the associated Cramer-Rao bound.
-The Cramer- Rao bound is based on estimating the curvature of the posterior PDF from the derivatives of the likelihood (or posterior probability) function.
-It thus requires us to write down a likelihood and take its derivative.
+\vspace{0.15in}
 
-For simplicity, we are going to restrict ourselves (for the moment) to the case of no dust and a single metallicity, $K=1$.
-We write the likelihood as 
+\underline{\textsc{The Cramer-Rao bound}}:
+We can obtain \emph{limits} on the achievable accuracy with relatively little computational expense.
+We will do this using the Fisher information matrix $\mathcal{I}$ and the associated Cramer-Rao bound.
+The Cramer-Rao bound (CRB) is a lower limit to the uncertainties of a parameter and is given by the inverse of the Fisher information matrix.
+The Fisher information matrix is a kind of measure of the fractional curvature of the likelihood near maximum likelihood. 
+Small curvature means a broad posterior, and hence higher uncertainty.
+It is based on the  expectation value of the second moment of partial derivatives of the log-likelihood with respect to the parameters.
 \begin{eqnarray}
-\mathcal{L} & = & 
+\mathcal{I} & = & E\left[\left(\nabla_\theta \ln \mathcal{L}(d \given \theta)\right)^2\right] \\
+ & = & -E\left[\nabla^2_\theta \ln \mathcal{L}(d \given \theta)\right]
 \end{eqnarray}
+It thus requires us to write down a log-likelihood and take its gradient.
+The CRB represents a lower limit to the uncertainty -- 
+if the log-posterior PDF has higher order moments, then the actual uncertainty can be much larger than what is estimated from the CRB
+
+For simplicity, we are going to restrict ourselves (for the moment) to the case of no dust and a single (known) metallicity, $K=1$.
+We will also assume perfect SSPs.
+Finally, we will assume errors on $F$ are gaussian and independent (see below for correlated uncertainties)
+This represents a \emph{best case scenario}.
+We write the log-likelihood as
+\begin{eqnarray}
+\ln \mathcal{L} & = & \sum^L_\lambda -\frac{(F_\lambda - \sum_i m_i \, s_{\lambda, i})^2}{2 \sigma_\lambda^2} - \ln(\sigma_i\sqrt(2\pi))
+\end{eqnarray}
+where the $\sigma_i$ are the independent uncertainties on each element of the flux vector.
+Then we take partial derivatives with respect to a specific parameter $m_n$
+\begin{eqnarray}
+\frac{\partial \ln \mathcal{L}}{\partial m_n} & = & \sum^L_\lambda  2 \, \frac{(F_\lambda - \sum_i m_i \, s_{\lambda, i})}{2 \sigma_\lambda^2} \, s_{\lambda, n} \\
+\frac{\partial^2 \ln \mathcal{L}}{\partial^2 m_n} & = & \sum^L_\lambda -\frac{s_{\lambda, n}^2}{\sigma_\lambda^2} 
+\end{eqnarray}
+These are the diagonal terms of the fisher information matrix.  The off diagonal terms are also important, as they are related to the parameter covariances. We can get these off diagonal terms, using instead
+\begin{eqnarray}
+\frac{\partial^2 \ln \mathcal{L}}{\partial m_n \partial m_\ell} & = & \sum^L_\lambda -\frac{s_{\lambda, n}\, s_{\lambda, \ell}}{\sigma_\lambda^2} 
+\end{eqnarray}
+Then we take the negative matrix inverse of the full Fisher information matrix to obtain the Cramer-Rao bound on the uncertainties on the parameters, including the effect of parameter covariances.
+
+
+\underline{\textsc{An Example}}:  
+The equations above are actually quite simple.  
+It's the dot product of the uncertainty normed SSPs. 
+Given the SSPs, the only thing left is to define the uncertainties, which for a given signal to noise depend on the values of $m_i$.  
+As an example, we'll consider an approximately constant SFH.  For SSPs evenly spaced in $\log t$ this means $m_i \propto t_i$.
+
+We use SSPs generated by FSPS with 
+the MILES spectral library (resolution $\sim 2.5\AA$ FWHM), over the range $\lambda\lambda = 3800-7000\AA$) and 
+Padova isochrones, which have 94 ages ($J=94$).
+For a S/N of $10^4$ per pixel, we obtain the uncertainty bounds in Figure \ref{fig:example}.
+This figure is based only on the diagonal terms of the Fisher information matrix.
+The precision scales linearly with the S/N.
+
+\begin{figure*}[h!]
+\includegraphics[width=0.5 \textwidth]{../figures/const_crb_full.pdf}
+\caption{Top: Input masses and Cramer-Rao bound for a constant SFH, single metallicity, and S/N$= 10^4$, when including all 94 isochrone ages.  Bottom: Ratio of the input mass to the Cramer-Rao bound. 
+\label{fig:example}}
+\end{figure*}
+
+
+
+\underline{\textsc{Binning in time (and Z)}}:
+Clearly, the required S/N to obtain useful precision on the weights of \emph{all} the SSPs is exceedingly large, even for a best case scenario toy problem.  
+This is at least partly because the different SSPs are actually extremely similar.  
+If we give up on computing the \emph{full} SFH we can bin the SSPs, 
+where the weights used in the binning enforce some particular intra-bin SFH that we choose, but to which the data are not very sensitive.
+Words about regularization.
+
+This substantially decreases the S/N requirement to reach a certain precision.  We show also the covariances.
+
+How do we choose the binning scheme?  Based on linear independence of the SSPs?
+
+\begin{figure*}[h!]
+\includegraphics[width=0.5 \textwidth]{../figures/const_crb.pdf}
+\caption{Top: Input masses and Cramer-Rao bound for a constant SFH, single metallicity, and S/N$= 10^2$, when the SSPs are rebinned to a 10-segement piecewise constant SFH.  Bottom: Ratio of the input mass to the Cramer-Rao bound. 
+\label{fig:example_bin}}
+\end{figure*}
+
+
+
+\underline{\textsc{The Correlated Uncertainties}}:
+What if there is correlated noise? That is, the errors on $F$ are drawn from a multivariate gaussian.
+\begin{eqnarray}
+F & = & M \, S + \epsilon \\
+\epsilon & = & \mathcal{N}(0, \Sigma(M)) \\
+F & = & \mathcal{N}(M \, S, \Sigma(M)) \\
+\end{eqnarray}
+where $\Sigma(M)$ is a covariance matrix describing the uncertainties, and is diagonal for uncorrelated errors on the fluxes.
 
 
 \end{document}
