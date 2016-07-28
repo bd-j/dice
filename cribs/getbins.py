@@ -67,7 +67,7 @@ def expand_bin(allages, ibin, relative_precision=1.0,
 
         mock_masses = sfh(agebins, **kwargs)
 
-        crb, mu = cramer_rao_bound(wave, spectra, mock_masses,
+        crb, mu = cramer_rao_bound(spectra, mock_masses,
                                    snr=snr, **kwargs)
         sigma = np.sqrt(np.diag(crb))
         bin_precision = mock_masses[ibin] / sigma[ibin]
@@ -82,7 +82,7 @@ def native_bins(allages, relative_precision=1.0,
     agebins = np.array([allages[:-1], allages[1:]]).T
     wave, spectra = get_basis(sps, agebins, **kwargs)
     mock_masses = sfh(agebins, **kwargs)
-    crb, mu = cramer_rao_bound(wave, spectra, mock_masses,
+    crb, mu = cramer_rao_bound(spectra, mock_masses,
                                snr=snr, **kwargs)
     sigma = np.sqrt(np.diag(crb))
     bin_precision = mock_masses / sigma

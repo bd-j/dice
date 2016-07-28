@@ -131,27 +131,31 @@ We will do this using the Fisher information matrix $\mathcal{I}$ and the associ
 The Cramer-Rao bound (CRB) is a lower limit to the uncertainties of a parameter and is given by the inverse of the Fisher information matrix.
 The Fisher information matrix is a kind of measure of the fractional curvature of the likelihood near maximum likelihood. 
 Small curvature means a broad posterior, and hence higher uncertainty.
-It is based on the  expectation value of the second moment of partial derivatives of the log-likelihood with respect to the parameters.
+It is based on the  expectation value of the second moment of partial derivatives of the ln-likelihood with respect to the parameters.
 \begin{eqnarray}
 \mathcal{I} & = & E\left[\left(\nabla_\theta \ln \mathcal{L}(d \given \theta)\right)^2\right] \\
  & = & -E\left[\nabla^2_\theta \ln \mathcal{L}(d \given \theta)\right]
 \end{eqnarray}
-It thus requires us to write down a log-likelihood and take its gradient.
+It thus requires us to write down a ln-likelihood and take its gradient.
 The CRB represents a lower limit to the uncertainty -- 
-if the log-posterior PDF has higher order moments, then the actual uncertainty can be much larger than what is estimated from the CRB
+if the ln-posterior PDF has higher order moments, then the actual uncertainty can be much larger than what is estimated from the CRB
 
 For simplicity, we are going to restrict ourselves (for the moment) to the case of no dust and a single (known) metallicity, $K=1$.
 We will also assume perfect SSPs.
 Finally, we will assume errors on $F$ are gaussian and independent (see below for correlated uncertainties)
 This represents a \emph{best case scenario}.
-We write the log-likelihood as
+This means that the ln-likelihood of the data given the model is a multivariate
+gaussian with mean given by the model spectrum and variance given by the data variances.
+We write the likelihood as
 \begin{eqnarray}
-\ln \mathcal{L} & = & \sum^L_\lambda -\frac{(F_\lambda - \sum_i m_i \, s_{\lambda, i})^2}{2 \sigma_\lambda^2} - \ln(\sigma_i\sqrt(2\pi))
+\mathcal{L}({\bf d} \,|\, {\bf m}) & = & \mathcal{N}(d \,|\, M \, S, \Sigma) \\
+ \ln \mathcal{L}(d \,|\, {\bf m}) & = & \sum^L_\lambda -\frac{(d_\lambda - \sum_i m_i \, s_{\lambda, i})^2}
+                                                      {2 \sigma_\lambda^2} - \ln(\sigma_i\sqrt(2\pi))
 \end{eqnarray}
 where the $\sigma_i$ are the independent uncertainties on each element of the flux vector.
 Then we take partial derivatives with respect to a specific parameter $m_n$
 \begin{eqnarray}
-\frac{\partial \ln \mathcal{L}}{\partial m_n} & = & \sum^L_\lambda  2 \, \frac{(F_\lambda - \sum_i m_i \, s_{\lambda, i})}{2 \sigma_\lambda^2} \, s_{\lambda, n} \\
+\frac{\partial \ln \mathcal{L}}{\partial m_n} & = & \sum^L_\lambda  2 \, \frac{(d_\lambda - \sum_i m_i \, s_{\lambda, i})}{2 \sigma_\lambda^2} \, s_{\lambda, n} \\
 \frac{\partial^2 \ln \mathcal{L}}{\partial^2 m_n} & = & \sum^L_\lambda -\frac{s_{\lambda, n}^2}{\sigma_\lambda^2} 
 \end{eqnarray}
 These are the diagonal terms of the fisher information matrix.  The off diagonal terms are also important, as they are related to the parameter covariances. We can get these off diagonal terms, using instead

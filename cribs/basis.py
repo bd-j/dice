@@ -1,20 +1,29 @@
 import numpy as np
+from scipy.interpolate import interp1d as interpolate
 try:
     from sedpy import observate
 except:
     pass
 
+
 def rectify_basis(wave, spectra, wlow=0, whigh=np.inf,
-              exclude=None, filters=None, **extras):
+                  exclude=[], outwave=None, filters=None, **extras):
     """Mask a spectral basis using lists of include and exclude ranges
     """
     if filters is not None:
         flist = observate.load_filters(filters)
         sed = observate.getSED(wave, spectra, filterlist=flist)
         return np.array([f.wave_effective for f in flist]), 10**(-0.4 * sed)
-    else:
-        g = (wave > wlow) & (wave < whigh)
-        return wave[g], spectra[:, g]
+
+    if outwave is not None:
+        func = interpolate(wave, spectra, axis=-1)
+        spectra = func(outwave)
+        wave = outwave
+    
+    g = (wave >= wlow) & (wave <= whigh)
+    for (lo, hi) in exclude:
+        g = g & ((wave < lo) | (wave > hi))
+    return wave[g], spectra[:, g]
 
 
 def get_binned_spectral_basis(sps, agebins, zbins=[0.], **kwargs):
