@@ -9,7 +9,7 @@ from prospect.sources import StepSFHBasis
 from basis import get_binned_spectral_basis as get_basis
 from sfhs import constant, exponential
 
-codename = 'Rasa'
+codename = 'Bea'
 
 filters = [
            'galex_FUV', 'galex_NUV',
