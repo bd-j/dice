@@ -6,17 +6,13 @@ import matplotlib.pyplot as pl
 from prospect.sources import StepSFHBasis 
 
 #from getbins import possible_bins, native_bins
-from basis import get_binned_spectral_basis as get_basis
-from sfhs import constant, exponential
+from dice.basis import get_binned_spectral_basis as get_basis
+from dice.sfhs import constant, exponential
+from dice.crbound import cramer_rao_bound
 
-codename = 'Rasa'
+codename = 'Dice'
 
 filters = [
-           'galex_FUV', 'galex_NUV',
-           'uvot_m2', 'uvot_w1', 'uvot_w2',
-           'sdss_u0', 'sdss_g0', 'sdss_r0', 'sdss_i0', 'sdss_z0',
-           'twomass_J', 'twomass_H', 'twomass_Ks',
-           'spitzer_irac_ch1', 'spitzer_irac_ch2', 'spitzer_irac_ch3'
            ]
 
 if __name__ == "__main__":
@@ -63,39 +59,30 @@ if __name__ == "__main__":
     dt = np.squeeze(np.diff(10**agebins, axis=-1))
     sfr = masses / dt
 
-    mu = np.dot(masses, spectra)
-    unc = mu / params['snr']
-    Sigma = np.diag(1./unc**2) # Uncorrelated errors
-
-    if params['units'] == 'mfrac':
+    ulabel = 'Uncertainty'
+    if params['units'] == 'massratio':
         # likelihood derivatives with respect to m/m_in
-        partial_mu = spectra * masses[:,None] #/ unc
-        unit = '$\Delta M/M$'
-        norm = 1.0
-        ulabel=None
+        transform = masses #/ unc
+        unit = '$M/M_{input}$'
     elif params['units'] == 'sfr':
         # likelihood derivates with respect to sfr
-        partial_mu = spectra * dt[:, None] #/ unc
+        transform = dt * sfr.mean() #/ unc
         unit = r'$SFR/ \langle SFR\rangle$'
-        norm = sfr.mean()
-        ulabel = 'Uncertainty'
-    fisher = np.dot(partial_mu, np.dot(Sigma, partial_mu.T))
-    try:
-        ch = np.linalg.cholesky(fisher)
-        crb = np.linalg.inv(fisher)
-    except(np.linalg.LinAlgError):
-        print('not positive definite!')
-        crb = np.linalg.pinv(fisher)
+    elif params['units'] == 'massfrac':
+        # likelihood derivates with respect to mtot
+        transform = np.ones(len(masses)) * masses.sum()
+        unit = r'$M/ M_{total}$'
+
+    crb, mu = cramer_rao_bound(spectra, masses, transformation=transform, **params)
 
     #pl.close('all')
     fig, ax = pl.subplots()
     punc = np.sqrt(np.diag(crb))
-    ax.step(allages,  np.append(punc, 0) / norm, where='post', label=ulabel,
+    ax.step(allages,  np.append(punc, 0), where='post', label=ulabel,
             linewidth=2)
-    if params['units'] == 'sfr':
-        ax.step(allages,  np.append(sfr, 0) / norm, where='post', label='Input',
-                linewidth=2)
-        ax.legend(loc=0)
+    ax.step(allages,  np.append(masses / transform, 0), where='post', label='Input',
+            linewidth=2)
+    ax.legend(loc=0)
     ax.axhline(1.0, linestyle=':', color='k', linewidth=1.5)
     ax.set_yscale('log')
     ax.set_title('Spectroscopy ({wlow}-{whigh}$\AA$, R=2.5$\AA$)'.format(**params))

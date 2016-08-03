@@ -6,10 +6,11 @@ import matplotlib.pyplot as pl
 from prospect.sources import StepSFHBasis 
 
 #from getbins import possible_bins, native_bins
-from basis import get_binned_spectral_basis as get_basis
-from sfhs import constant, exponential
+from dice.basis import get_binned_spectral_basis as get_basis
+from dice.sfhs import constant, exponential
+from dice.crbound import cramer_rao_bound
 
-codename = 'Bea'
+codename = 'Dice'
 
 filters = [
            'galex_FUV', 'galex_NUV',
@@ -31,13 +32,13 @@ if __name__ == "__main__":
               'sfh': exponential,
               'power': 2,
               'tau': 1.,
-              'tage': 1., #None,
+              'tage': 10., #None,
               'filters': filters,
               'wlow': 3800,
               'whigh': 7000,
               'snr': 20.0,
               'relative_precision': 0.5,
-              'units': 'sfr',
+              'units': 'massfrac',
               'sigma_contribution': False,
               'covariances': True,
               'renormalize': False,
@@ -56,47 +57,40 @@ if __name__ == "__main__":
         allages = np.append(allages, binedges[-1])
     allages = np.array([4.0, 7.5, 8.0, 8.5, 9.0, 9.5, 9.8, np.log10(13.6e9)])
     allages = np.array([4.0, 7.5, 8.3, 9.0, 9.5, 9.8, np.log10(13.6e9)])
-    allages = np.array([0, 8.0, 8.5, 9.0, 9.5, np.log10(13.6e9)]) #Leja bins
+    #allages = np.array([0, 8.0, 8.5, 9.0, 9.5, np.log10(13.6e9)]) #Leja bins
     agebins = np.array([allages[:-1], allages[1:]]).T
+    
     wave, spectra = get_basis(sps, agebins, **params)
     masses = sfh(agebins, **params)
     dt = np.squeeze(np.diff(10**agebins, axis=-1))
     sfr = masses / dt
 
-    mu = np.dot(masses, spectra)
-    unc = mu / params['snr']
-    Sigma = np.diag(1./unc**2) # Uncorrelated errors
-
-    if params['units'] == 'mfrac':
+    ulabel = 'Uncertainty'
+    if params['units'] == 'massratio':
         # likelihood derivatives with respect to m/m_in
-        partial_mu = spectra * masses[:,None] #/ unc
-        unit = '$\Delta M/M$'
-        norm = 1.0
-        ulabel = None
+        transform = masses
+        unit = '$M/M_{input}$'
     elif params['units'] == 'sfr':
-        # likelihood derivates with respect to sfr
-        partial_mu = spectra * dt[:, None] #/ unc
+        # likelihood derivates with respect to sfr / <sfr>
+        transform = dt * sfr.mean()
         unit = r'$SFR/ \langle SFR\rangle$'
-        norm = sfr.mean()
-        ulabel = 'Uncertainty'
-    fisher = np.dot(partial_mu, np.dot(Sigma, partial_mu.T))
-    try:
-        ch = np.linalg.cholesky(fisher)
-        crb = np.linalg.inv(fisher)
-    except(np.linalg.LinAlgError):
-        print('not positive definite!')
-        crb = np.linalg.pinv(fisher)
+    elif params['units'] == 'massfrac':
+        # likelihood derivates with respect to mtot
+        transform = np.ones(len(masses)) * masses.sum()
+        unit = r'$M/ M_{total}$'
 
+    crb, mu = cramer_rao_bound(spectra, masses, transformation=transform, **params)
+        
     #pl.close('all')
     fig, ax = pl.subplots()
     #ax.plot((allages[1:] + allages[:-1])/2., np.sqrt(np.diag(crb)), '-o')
     punc = np.sqrt(np.diag(crb))
-    ax.step(allages,  np.append(punc, 0) / norm, where='post', label=ulabel,
+    ax.step(allages,  np.append(punc, 0), where='post', label=ulabel,
             linewidth=2)
-    if params['units'] == 'sfr':
-        ax.step(allages,  np.append(sfr, 0) / norm, where='post', label='Input',
-                linewidth=2)
-        ax.legend(loc=0)
+    ax.step(allages,  np.append(masses / transform, 0), where='post', label='Input',
+            linewidth=2)
+    ax.legend(loc=0)
+    
     ax.axhline(1.0, linestyle=':', color='k', linewidth=1.5)
     ax.set_yscale('log')
     ax.set_title('Photometry ({} bands)'.format(len(filters)))

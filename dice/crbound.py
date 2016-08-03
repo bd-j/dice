@@ -1,43 +1,51 @@
 import numpy as np
 
 
-def fisher_matrix(spectra, masses, snr=100, normed=True, normalization=None,
-                  unc=None, **extras):
-    """ Calculate the Fisher information Matrix
+def fisher_matrix(spectra, masses, snr=100, transformation=None,
+                  unc=None, sigma_contribution=False, **extras):
+    """ Calculate the Fisher information Matrix.  Currently does not work for
+    anything other than uncorrelated gaussian errors.
     """
     mu = np.dot(masses, spectra)
     if unc is None:
         unc = mu / snr
     # Inverse covariance matrix
-    Sigma = np.diag(1./unc**2) # Uncorrelated errors
+    invSigma = np.diag(1./unc**2) # Uncorrelated errors
 
-    if normed:
-#        if normalization is None:
-#            normalization = masses
-        # likelihood derivatives with respect to mu
-        partial_mu = spectra * masses[:,None]
-        # likelihood derivatives with respect to Sigma
-        partial_sigma = spectra * masses[:, None] / mu
-        fisher = np.dot(partial_mu, np.dot(Sigma, partial_mu.T))
-        # Do it out explicitly?  I think this is the same
-        #for i in range(nage):
-        #    for j in range(nage):
-        #        fisher[i, j] = np.dot(partial_mu[i,:], np.dot(Sigma, partial_mu[j,:].T))
-    else:
-        # Old style
-        partial_mu = spectra / unc
-        partial_sigma = spectra / mu
-        fisher = np.einsum('ik,jk->ij', partial_mu, partial_mu)
-        if sigma_contribution:
-            fisher += 2 * np.einsum('ik,jk->ij', partial_sigma, partial_sigma)
+    partial_mu = spectra
+    # Transform the amplitudes
+    if transformation is not None:
+        partial_mu *= transformation[:, None]
+        
+    fisher = np.dot(partial_mu, np.dot(invSigma, partial_mu.T))
+    # Do it out explicitly?  I think this is the same as
+    #for i in range(nage):
+    #    for j in range(nage):
+    #        fisher[i, j] = np.dot(partial_mu[i,:], np.dot(Sigma, partial_mu[j,:].T))
+
+    if sigma_contribution:
+        partial_sigma = 2 * unc * partial_mu / snr
+        raise(NotImplementedError)
 
     return fisher, mu
 
+def fisher_matrix_old(spectra, masses, snr=100, unc=None,
+                      sigma_contribution=False, **extras):
+    # Old style, using einsum
+    mu = np.dot(masses, spectra)
+    if unc is None:
+        unc = mu / snr
+    partial_mu = spectra / unc
+    partial_sigma = spectra / mu
+    fisher = np.einsum('ik,jk->ij', partial_mu, partial_mu)
+    if sigma_contribution:
+        fisher += 2 * np.einsum('ik,jk->ij', partial_sigma, partial_sigma)
+    return fisher, mu
 
-def cramer_rao_bound(spectra, masses, snr=100, sigma_contribution=True,
-                     covariances=True, renormalize=False, regularize=False,
-                     **extras):
-    """Calculate the Cramer-Rao Bound
+
+def cramer_rao_bound(spectra, masses, snr=100, covariances=True,
+                     renormalize=False, regularize=False, **extras):
+    """Calculate the Cramer-Rao Bound.
 
     :param masses:
         Wavelength array, ndarray of shape (nw,)
@@ -78,6 +86,7 @@ def cramer_rao_bound(spectra, masses, snr=100, sigma_contribution=True,
                 crb = np.linalg.pinv(fisher)
     else:
         # Get the constraints without including covariances in the parameters.
+        # Never do this.
         crb = np.diag(1./np.diag(fisher))
 
     return crb, mu
