@@ -9,6 +9,7 @@ from prospect.sources import StepSFHBasis
 from dice.basis import get_binned_spectral_basis as get_basis
 from dice.sfhs import constant, exponential
 from dice.crbound import cramer_rao_bound
+from dice.plotting import plot_sfh
 
 codename = 'Dice'
 
@@ -26,8 +27,8 @@ if __name__ == "__main__":
               'get_basis': get_basis,
               'sfh': exponential,
               'power': 2,
-              'tau': 1.,
-              'tage': 1.0,
+              'tau': 5.,
+              'tage': 10.0,
               'filters': None, #filters,
               'wlow': 3800,
               'whigh': 7000,
@@ -41,7 +42,7 @@ if __name__ == "__main__":
               'rebin': 8,
               }
     params['outwave'] = np.arange(params['wlow'], params['whigh'], 2.54/2.0)
-    plabel = '\n$S/N=${snr:.0f}\n$tau$={tau}, $tage=${tage}'.format(**params)
+    plabel = '\n$S/N=${snr:.0f}/pix\n$tau$={tau}, $tage=${tage}'.format(**params)
         
     get_basis = params.pop('get_basis')
     sps = params.pop('sps')
@@ -75,23 +76,12 @@ if __name__ == "__main__":
 
     crb, mu = cramer_rao_bound(spectra, masses, transformation=transform, **params)
 
-    #pl.close('all')
+    # Marginalized uncertainties
     fig, ax = pl.subplots()
-    punc = np.sqrt(np.diag(crb))
-    ax.step(allages,  np.append(punc, 0), where='post', label=ulabel,
-            linewidth=2)
-    ax.step(allages,  np.append(masses / transform, 0), where='post', label='Input',
-            linewidth=2)
-    ax.legend(loc=0)
-    ax.axhline(1.0, linestyle=':', color='k', linewidth=1.5)
-    ax.set_yscale('log')
-    ax.set_title('Spectroscopy ({wlow}-{whigh}$\AA$, R=2.5$\AA$)'.format(**params))
-    ax.set_xlabel('lookback time (log yrs)')
+    ax = plot_sfh(ax, allages, crb, masses/transform, unit=unit, **params)
     props = dict(boxstyle='round', facecolor='w', alpha=0.5)
     ax.text(0.05, 0.95, plabel,
             transform=ax.transAxes, fontsize=14,
             verticalalignment='top', bbox=props)
-    ax.set_ylabel(unit)
-    ax.set_xlim(max(allages.min(), 6.5), allages.max())
-    ax.set_ylim(1e-2, 1e1)
+    ax.set_ylim(1e-2, 3e1)
     pl.show()

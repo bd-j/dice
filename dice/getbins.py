@@ -3,8 +3,27 @@ import numpy as np
 import matplotlib.pyplot as pl
 from scipy.special import gammainc
 
-from crbound import cramer_rao_bound
-from sfhs import *
+from .crbound import cramer_rao_bound
+from .sfhs import *
+
+
+def analytic_transformation(crb, rebin_matrix, mu=None, **extras):
+    """Compute the covariance matrix of a linear transformation of the input
+    multivariate gaussian describe by `crb`.  The linear transformation is
+    given by `rebin_matrix` and if filled with ones and zeros amounts to
+    computing the covariances on sums of parameters.  E.g.
+
+    If crb is a 3x3 covariance matrix for 3 SFH bins, then if `rebin_matrix` =
+    [[1,1,0],[0,0,1]] then the output will be the variance-covaraince matrix
+    for the amplitude in the 2 bins where the first bin is the sum of the first
+    two bins in the orginal scheme.
+    """
+
+    Sigma = np.dot(rebin_matrix, np.dot(crb, rebin_matrix.T))
+    if mu is not None:
+        return Sigma, np.dot(rebin_matrix, mu)
+    return Sigma
+
 
 def possible_bins(inbinedges, verbose=True, **kwargs):
     """Iteratively expand a bin until the desired output precision of the
