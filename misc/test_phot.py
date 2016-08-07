@@ -32,7 +32,7 @@ if __name__ == "__main__":
               'get_basis': get_basis,
               'sfh': exponential,
               'power': 2,
-              'tau': 5.,
+              'tau': 1.,
               'tage': 10., #None,
               'filters': filters,
               'wlow': 3800,
@@ -65,6 +65,7 @@ if __name__ == "__main__":
     masses = sfh(agebins, **params)
     dt = np.squeeze(np.diff(10**agebins, axis=-1))
     sfr = masses / dt
+    mean_sfr = masses.sum() / 10**agebins.max()
 
     ulabel = 'Uncertainty'
     if params['units'] == 'massratio':

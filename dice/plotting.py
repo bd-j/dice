@@ -1,5 +1,6 @@
 import matplotlib.pyplot as pl
 import numpy as np
+import matplotlib.mlab as mlab
 
 
 def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
@@ -30,6 +31,22 @@ def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
 
     return ax
 
-def plot_covariances(ax):
+def plot_covariances(axes, crb, invals, unit='', filters=None, plabel=None):
+
+    n = crb.shape[0]
+    for i in range(n):
+        for j in range(i, n):
+            ax = axes[i,j]
+            plotagauss(ax
+    
     pass
     # Covariances
+
+def plotagauss(ax, xlim, ylim, covar, cx=0, cy=0):
+    x = np.linspace(xlim[0], xlim[1], nx)
+    y = np.linspace(ylim[0], ylim[1], ny)
+    X, Y = np.meshgrid(x-cx, y-cy)
+    # pos = np.dstack([X, Y])
+    pos = np.array([X,Y]).transpose(2,1,0)
+    Z = multivariate_normal.pdf(X, Y, cov=covar)
+    

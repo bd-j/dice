@@ -67,8 +67,9 @@ These data are expensive to collect, and its only possible for very nearby galax
 The next most informative is probably integrated or integral field spectroscopy of galaxies.
 This data is far more plentiful.
 But we don't really know how well it tells us things....
-In particular, the spectra of of successive generations of stars or not extremely different, 
-which leads to the intuition that there should be large degeneracies in the masses stellar generations that are close in time.
+In particular, the spectra of of successive generations of stars are not extremely different, 
+which leads to the intuition that there should be large degeneracies in the inferred masses stellar generations that are close in time.
+These degeneracies are minimized where the observable properties
 
 \vspace{0.15in}
 
@@ -111,13 +112,25 @@ F & = & M \, S
 Assuming the SSP spectra $s_{i}$ are linearly independent and perfect, that $L > J\times K$, and that we have perfect knowledge of $F$ (the integrated spectrum), and that there is no dust, 
 then this equation can be solved for $M$ using standard linear algebra techniques.
 
-However, we do not know $F$ perfectly, and there is dust. 
-The question then is, given $F_\lambda$ to some known precision, how well can we constrain the $m_{j,k}$ values? 
-Alternatively, what signal to noise is required to constrain $m_{j,k}$ to a specified precision?
-Another interesting question concerns the number of independent $m_{j,k}$ values that can be constrained to a given precision -- 
-that is, the time (and metallicity) resolution of the SFH that is acheivable for a given integrated spectrum.
-A clear and systematic answer to this question has not yet been given, though much excellent work in this direction has been done.
+However, we do not know $F$ perfectly (we know $d = F + \epsilon$), and there is dust. 
+Several related questions then arise:
+\begin{enumerate}
 
+\item Given $d_\lambda$ with known, independent, uncertainties, how well can we constrain the $m_{j,k}$ values? 
+Alternatively, what signal to noise is required to constrain $m_{j,k}$ to a specified precision?  
+This is mildly SFH dependent.
+
+\item What is the largest number of components $m_{j,k}$ that can be constrained to a given precision?
+That is, what is the time (and metallicity) resolution of the SFH that is acheivable for a given integrated spectrum?
+This is very dependent on the SFH.
+
+\item For a given number of components and precision, wghat is the necessary data? 
+(S/N, wavelength range, resolution).
+Very SFH dependent and probably not unique.
+
+\end{enumerate}
+
+A clear and systematic answer to this question has not yet been given, though much excellent work in this direction has been done. 
 A complete answer is actually quite difficult, as one must somehow explore the full joint posterior probability distribution for the $m_{j,k}$, 
 which in general can be complex and depends on the SFH itself.
 Efforts have been made using, for example, non-negative matrix factorization of Monte Carlo samplings of the noise, 
@@ -128,7 +141,7 @@ but this can be time consuming, and the effects of different SFHs, wavelength ra
 \underline{\textsc{The Cramer-Rao bound}}:
 We can obtain \emph{limits} on the achievable accuracy with relatively little computational expense.
 We will do this using the Fisher information matrix $\mathcal{I}$ and the associated Cramer-Rao bound.
-The Cramer-Rao bound (CRB) is a lower limit to the uncertainties of a parameter and is given by the inverse of the Fisher information matrix.
+The Cramer-Rao bound (CRB) is a lower limit to the uncertainties of a parameter and is given by the (matrix) inverse of the Fisher information matrix.
 The Fisher information matrix is a kind of measure of the fractional curvature of the likelihood near maximum likelihood. 
 Small curvature means a broad posterior, and hence higher uncertainty.
 It is based on the  expectation value of the second moment of partial derivatives of the ln-likelihood with respect to the parameters.
@@ -142,7 +155,7 @@ if the ln-posterior PDF has higher order moments, then the actual uncertainty ca
 
 For simplicity, we are going to restrict ourselves (for the moment) to the case of no dust and a single (known) metallicity, $K=1$.
 We will also assume perfect SSPs.
-Finally, we will assume errors on $F$ are gaussian and independent (see below for correlated uncertainties)
+Finally, we will assume errors on $d$ are gaussian and independent (see below for correlated uncertainties)
 This represents a \emph{best case scenario}.
 This means that the ln-likelihood of the data given the model is a multivariate
 gaussian with mean given by the model spectrum and variance given by the data variances.
@@ -191,18 +204,34 @@ Clearly, the required S/N to obtain useful precision on the weights of \emph{all
 This is at least partly because the different SSPs are actually extremely similar.  
 If we give up on computing the \emph{full} SFH we can bin the SSPs, 
 where the weights used in the binning enforce some particular intra-bin SFH that we choose, but to which the data are not very sensitive.
-Words about regularization.
+{\bf Words about regularization.}
 
-This substantially decreases the S/N requirement to reach a certain precision.  We show also the covariances.
 
-How do we choose the binning scheme?  Based on linear independence of the SSPs?
+In fact, since the rebinning is a linear operation, we can compute the uncertainties on rebinned spectra analytically.
+If we define a rebinning matrix $R$ such that
+\begin{eqnarray}
+F = \hat{M} \, R \, S
+\end{eqnarray}
+where $S$ is the $J \times L$ element spectra matrix from before, $R$ is a $N x J$ matrix of rebinning weights, and $\hat{M}$ is now an $N$ length vector of the amplitudes of the new components.  
+For strict rebinning, $R$ should only contain values of 1 or 0, 
+but many kinds of linear transformation can be adopted (e.g. to mimic a certain SFH for any given component).
+In the more general case any positive numbers make physical sense.
+To understand how this rebinning affects the uncertainties, 
+we apply the linear transformation $R$ to the variance-ovariance matrix C
+\begin{eqnarray}
+\hat{C} = R \, C  \, R^T
+\end{eqnarray}
+
+This substantially decreases the S/N requirement to reach a certain precision.  
+We show also the covariances.
+How do we choose the binning scheme?  
+Based on linear independence of the SSPs?
 
 \begin{figure*}[h!]
 \includegraphics[width=0.5 \textwidth]{../figures/const_crb.pdf}
 \caption{Top: Input masses and Cramer-Rao bound for a constant SFH, single metallicity, and S/N$= 10^2$, when the SSPs are rebinned to a 10-segement piecewise constant SFH.  Bottom: Ratio of the input mass to the Cramer-Rao bound. 
 \label{fig:example_bin}}
 \end{figure*}
-
 
 
 \underline{\textsc{The Correlated Uncertainties}}:
@@ -213,6 +242,14 @@ F & = & M \, S + \epsilon \\
 F & = & \mathcal{N}(M \, S, \Sigma(M)) \\
 \end{eqnarray}
 where $\Sigma(M)$ is a covariance matrix describing the uncertainties, and is diagonal for uncorrelated errors on the fluxes.
+
+\underline{\textsc{Validation with MCMC}}:
+In this section we check the uncertainty bounds given by the CRB using MCMC explorations of parameter probabilities within the simple model discussed above.
+
+
+\underline{\textsc{Caveats and Limitations}}:
+The Cramer-Rao bound only has meaning in the context in which your model is correct.
+For example, the Cramer-Rao bound cannot tell you about uncertainties in the 
 
 
 \end{document}
