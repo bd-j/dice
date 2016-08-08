@@ -9,12 +9,12 @@ from prospect.sources import StepSFHBasis
 from dice.basis import get_binned_spectral_basis as get_basis
 from dice.sfhs import constant, exponential
 from dice.crbound import cramer_rao_bound
-from dice.plotting import plot_sfh
+from dice.plotting import plot_sfh, plot_covariances
 
-codename = 'Dice'
 
 filters = [
            ]
+
 
 if __name__ == "__main__":
     sps = StepSFHBasis()
@@ -84,4 +84,11 @@ if __name__ == "__main__":
             transform=ax.transAxes, fontsize=14,
             verticalalignment='top', bbox=props)
     ax.set_ylim(1e-2, 3e1)
+
+    # Covariances
+    pl.rcParams['contour.negative_linestyle'] = 'solid'
+    nb = len(sfr)
+    cfig, caxes = pl.subplots(nb, nb)
+    caxes = plot_covariances(caxes, crb, masses/transform, unit=unit, nsigma=5, ptiles=[0.683, 0.955])
+    [ax.set_visible(False) for ax in caxes.flat if ax.has_data() is False]
     pl.show()

@@ -17,6 +17,9 @@ def analytic_transformation(crb, rebin_matrix, mu=None, **extras):
     [[1,1,0],[0,0,1]] then the output will be the variance-covaraince matrix
     for the amplitude in the 2 bins where the first bin is the sum of the first
     two bins in the orginal scheme.
+
+    :param rebin_matrix:
+        An array of shape (nnew, nold)
     """
 
     Sigma = np.dot(rebin_matrix, np.dot(crb, rebin_matrix.T))
@@ -25,6 +28,18 @@ def analytic_transformation(crb, rebin_matrix, mu=None, **extras):
     return Sigma
 
 
+def build_rebin(oldedges, newedges):
+    nnew, nold = len(newedges)-1, len(oldedges)-1
+    rmatrix = np.zeros([nnew, nold])
+    for i, new in enumerate(newedges[:-1]):
+        assert new in oldedges, '{} not in {}'.format(new, oldedges)
+        #print(np.searchsorted(oldedges, newedges[i:i+2]), newedges[i:i+2])
+        ilo, ihi = np.searchsorted(oldedges, newedges[i:i+2])
+        #print(ilo, ihi, oldedges[ilo], oldedges[ihi])
+        rmatrix[i, ilo:ihi] = 1
+    return rmatrix
+
+        
 def possible_bins(inbinedges, verbose=True, **kwargs):
     """Iteratively expand a bin until the desired output precision of the
     amplitude of the bin is reached.

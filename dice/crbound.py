@@ -90,3 +90,16 @@ def cramer_rao_bound(spectra, masses, snr=100, covariances=True,
         crb = np.diag(1./np.diag(fisher))
 
     return crb, mu
+
+
+def svd_comp(spectra, masses, snr=100, realizations=0):
+    f = np.dot(masses, spectra)
+    U, w, Vt = np.linalg.svd(spectra.T)
+
+    norm_true = np.dot(U.T, f)
+    if realizations > 0:
+        noise = f /snr * np.random.normal(size=(realizations, len(f)))        
+        norm_noise = np.dot(U, noise.T)
+        return norm_true, f.mean() / snr, norm_noise
+    
+    return norm_true, f.mean() / snr

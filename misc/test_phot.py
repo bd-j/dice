@@ -11,15 +11,15 @@ from dice.sfhs import constant, exponential
 from dice.crbound import cramer_rao_bound
 from dice.plotting import plot_sfh, plot_covariances
 
-codename = 'Dice'
 
 filters = [
            'galex_FUV', 'galex_NUV',
-           #'uvot_m2', 'uvot_w1', 'uvot_w2',
+           'uvot_m2', 'uvot_w1', 'uvot_w2',
            'sdss_u0', 'sdss_g0', 'sdss_r0', 'sdss_i0', 'sdss_z0',
            'twomass_J', 'twomass_H', 'twomass_Ks',
            'spitzer_irac_ch1', 'spitzer_irac_ch2', 'spitzer_irac_ch3'
            ]
+
 
 if __name__ == "__main__":
     sps = StepSFHBasis()
@@ -32,19 +32,19 @@ if __name__ == "__main__":
               'get_basis': get_basis,
               'sfh': exponential,
               'power': 2,
-              'tau': 5.,
+              'tau': 1.,
               'tage': 10., #None,
               'filters': filters,
               'wlow': 3800,
               'whigh': 7000,
-              'snr': 100.0,
+              'snr': 1000.0,
               'relative_precision': 0.5,
               'units': 'sfr',
               'sigma_contribution': False,
               'covariances': True,
               'renormalize': False,
               'regularize': False,
-              'rebin': 8,
+              'rebin': 6,
               }
 
     plabel = '\n$S/N=${snr:.0f}\n$tau$={tau}, $tage=${tage}'.format(**params)
