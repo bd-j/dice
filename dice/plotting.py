@@ -1,6 +1,9 @@
 import matplotlib.pyplot as pl
 import numpy as np
-import matplotlib.mlab as mlab
+#import matplotlib.mlab as mlab
+from scipy.stats import multivariate_normal
+from scipy.linalg import cho_factor, cho_solve
+from numpy.core.umath_tests import inner1d
 
 
 def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
@@ -31,22 +34,70 @@ def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
 
     return ax
 
-def plot_covariances(axes, crb, invals, unit='', filters=None, plabel=None):
+
+def plot_covariances(axes, crb, invals, unit='', ptiles=[0.683, 0.955],
+                     filters=None, plabel=None, color='red',
+                     nbin=100, nsigma=4., **extras):
 
     n = crb.shape[0]
     for i in range(n):
-        for j in range(i, n):
-            ax = axes[i,j]
-            plotagauss(ax
-    
-    pass
-    # Covariances
+        ax = axes[i,i]
+        dx = nsigma * np.sqrt(crb[i,i])
+        x = np.linspace(max(invals[i] - dx, 0), invals[i] + dx, nbin)
+        ax.plot(x, np.exp(gauss(x, crb[i,i], mu=invals[i])))
+        for j in range(i+1, n):
+            ax = axes[j, i]
+            dy = nsigma * np.sqrt(crb[j,j])
+            y = np.linspace(max(invals[j] - dy, 0), invals[j] + dy, nbin)
+            mean = np.array([invals[i], invals[j]])
+            covar = np.array([[crb[i,i], crb[i,j]], [crb[j,i], crb[j,j]]])
+            pdf = twod_gauss(x, y, covar, mu=mean)
+            levels = -cdf_to_level(np.array(ptiles))
+            ax.contour(pdf[0], pdf[1], pdf[2], levels=levels, colors=color)
+    return axes
+            
 
-def plotagauss(ax, xlim, ylim, covar, cx=0, cy=0):
-    x = np.linspace(xlim[0], xlim[1], nx)
-    y = np.linspace(ylim[0], ylim[1], ny)
-    X, Y = np.meshgrid(x-cx, y-cy)
-    # pos = np.dstack([X, Y])
-    pos = np.array([X,Y]).transpose(2,1,0)
-    Z = multivariate_normal.pdf(X, Y, cov=covar)
-    
+def multigaussian(X, Sigma, mu=0., intervals=True, **extras):
+    """Values of a multivariate gaussian
+
+    :param flatX:
+         ndarray of shape (ndim, npoints)
+
+    :param Sigma:
+         Covariance matrix, ndarray of shape (ndim, ndim)
+
+    :returns lnp:
+         The ln of value of the gaussian at flatX
+
+    :returns log_det:
+         ln of the determinant
+    """
+
+    flatX = X - mu[:, None]
+    n = Sigma.shape[0]
+    icov = np.linalg.inv(Sigma)
+    log_det =  np.log(np.linalg.det(Sigma))
+    lnp = -0.5 * (inner1d(flatX.T, np.dot(icov, flatX).T))
+    if not intervals:
+        lnp -= 0.5 * (log_det + n * np.log(2.*np.pi))
+    return lnp, log_det
+
+def gauss(X, var, mu=0.):
+    x = (X - mu) / var
+    return -0.5 * x**2
+
+def twod_gauss(x, y, covar, **kwargs):
+    X, Y = np.meshgrid(x, y)
+    pos = np.array([X,Y])
+    dim = pos.shape
+    flat_pos = pos.reshape(dim[0], dim[1]*dim[2])
+    Z, logdet = multigaussian(flat_pos, covar, **kwargs)
+    return X, Y, Z.reshape(dim[1], dim[2])
+
+
+def cdf_to_level(ptile):
+    """Convert between percentile and lnp value for a 2-d chi-square
+    distribution
+    """
+    level = -2.0 * np.log(1 - ptile)
+    return level

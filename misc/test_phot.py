@@ -9,7 +9,7 @@ from prospect.sources import StepSFHBasis
 from dice.basis import get_binned_spectral_basis as get_basis
 from dice.sfhs import constant, exponential
 from dice.crbound import cramer_rao_bound
-from dice.plotting import plot_sfh
+from dice.plotting import plot_sfh, plot_covariances
 
 codename = 'Dice'
 
@@ -32,19 +32,19 @@ if __name__ == "__main__":
               'get_basis': get_basis,
               'sfh': exponential,
               'power': 2,
-              'tau': 1.,
+              'tau': 5.,
               'tage': 10., #None,
               'filters': filters,
               'wlow': 3800,
               'whigh': 7000,
-              'snr': 20.0,
+              'snr': 100.0,
               'relative_precision': 0.5,
               'units': 'sfr',
               'sigma_contribution': False,
               'covariances': True,
               'renormalize': False,
               'regularize': False,
-              'rebin': 4,
+              'rebin': 8,
               }
 
     plabel = '\n$S/N=${snr:.0f}\n$tau$={tau}, $tage=${tage}'.format(**params)
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     allages = binedges[::params['rebin']]
     if allages[-1] < binedges[-1]:
         allages = np.append(allages, binedges[-1])
-    allages = np.array([4.0, 7.5, 8.0, 8.5, 9.0, 9.5, 9.8, np.log10(13.6e9)])
-    allages = np.array([4.0, 7.5, 8.3, 9.0, 9.5, 9.8, np.log10(13.6e9)])
+    #allages = np.array([4.0, 7.5, 8.0, 8.5, 9.0, 9.5, 9.8, np.log10(13.6e9)])
+    #allages = np.array([4.0, 7.5, 8.3, 9.0, 9.5, 9.8, np.log10(13.6e9)])
     #allages = np.array([0, 8.0, 8.5, 9.0, 9.5, np.log10(13.6e9)]) #Leja bins
     agebins = np.array([allages[:-1], allages[1:]]).T
     
@@ -93,6 +93,9 @@ if __name__ == "__main__":
     ax.set_ylim(1e-2, 1e3)
 
     # Covariances
-
-    
+    pl.rcParams['contour.negative_linestyle'] = 'solid'
+    nb = len(sfr)
+    cfig, caxes = pl.subplots(nb, nb)
+    caxes = plot_covariances(caxes, crb, masses/transform, unit=unit, nsigma=5, ptiles=[0.683, 0.955])
+    [ax.set_visible(False) for ax in caxes.flat if ax.has_data() is False]
     pl.show()
