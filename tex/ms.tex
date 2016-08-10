@@ -1,0 +1,159 @@
+% This file is part of the `dice` project.
+% Copyright 2016 the authors.
+% All rights reserved.
+
+% ## style notes:
+% - all equations in `eqnarray` environments
+% - use `\,` as the multiply operator!
+% - parameters are `inferred`; `measurement` is reserved for data
+% - use emulateapj or aastex, as you like, but watch for equation-wrapping in the former
+
+% ---- (aastex) mode ----
+%\documentclass[12pt, letterpaper, preprint]{aastex}
+% ----
+
+
+% ---- (emulateapj) mode ----
+ \documentclass[iop,numberedappendix]{emulateapj}
+ \usepackage{apjfonts}
+% ----
+\usepackage{color, hyperref}
+\usepackage[normalem]{ulem}
+\bibliographystyle{apj}
+\input{vc}
+
+% math shih
+\newcommand{\transpose}[1]{{#1}^{\!\mathsf T}}
+\newcommand{\given}{\,|\,}
+\renewcommand{\det}[1]{||{#1}||}
+
+% affiliation marks; edit with care
+\newcommand{\cfa}{1}
+
+%figures
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.png,.pdf}
+
+%references
+\newcommand{\foreign}[1]{\emph{#1}}
+\newcommand{\etal}{\foreign{et\,al.}}
+
+
+\begin{document}\sloppy\sloppypar
+\title{The Information Content of Galaxy Spectra}
+\shorttitle{Galaxy Spectral Information}
+\author{
+  B.D.J.\altaffilmark{\cfa},
+  AUTHORS}
+\shortauthors{BDJ et al.}
+\altaffiltext{\cfa}{Center for Astrophysics}
+
+\begin{abstract}
+Galaxy spectra carry information about the stellar and dust content of galaxies, ultimately relating to the star-formation history of galaxies.
+
+\end{abstract}
+
+\section{Introduction}
+
+
+\section{Methodology}
+
+\subsection{Population Synthesis Formalism}
+Here we're going to define some terms and introduce notation. We define SFH as the function 
+\begin{eqnarray}
+\mathrm{SFH} & \equiv & \psi(t, Z)
+\end{eqnarray}
+where $t$ is the \emph{lookback} time,
+$Z$ is the metallicity,
+and $\psi$ is the mass of stars formed per unit lookback time and unit metallicity.
+
+The basic equation of stellar population synthesis describes the integrated spectrum $F_\lambda$ at time $T$ in terms of the SFH and other parameters:
+\begin{eqnarray} \label{eqn:sps}
+F_\lambda & = & \int_0^{t_{univ}(T)} dt \, \int_{Z_{min}}^{Z_{max}} dZ \, \psi(t, Z) \, s_\lambda(t, Z) \, e^{-\tau_\lambda(t, Z)}
+\end{eqnarray}
+where $s_\lambda(t, Z)$ is the spectrum of a unit mass of stars of age $t$ and metallicity $Z$, and
+$\tau_\lambda(t, Z)$ is the \emph{effective} dust opacity towards stars of age $t$ and metallicity $Z$.
+
+In practice, this is approximated by a sum over discrete \emph{simple stellar populations} (SSPs).  
+These SSPs are the $s_\lambda(t, Z)$ for $J$ specific values of $t$ (indexed as $t_j$) and $K$ specific values $Z$ (indexed as $Z_k$).
+They are calculated using isochrones and stellar spectral libraries.
+The integral in Eq. \ref{eqn:sps} is then approximated by 
+\begin{eqnarray}
+F_\lambda & = & \sum_{j=1}^J \, \sum_{k=1}^{K} \, m_{j,k} \, s_{\lambda, j,k} \, e^{-\tau_{j,k}} \\
+s_{\lambda, j,k} & = & s_\lambda(t_j, Z_k)
+\end{eqnarray}
+where the $m_{j,k}$ are the masses or \emph{weights} of each SSP.  
+These weights are determined by $\psi(t, Z)$ and the SSP interpolation scheme, and are constrained to be positive.
+If we collapse the two indices $j, k$ into a single index $i \equiv j\cdot K + k$ and ignore dust then we can write this in matrix form
+\begin{eqnarray} \label{eqn:sps-matrix}
+F & = & M \, S %\cdot e^{-A\, R}
+\end{eqnarray}
+where $F$ is a vector of $L$ fluxes giving the integrated spectrum,
+$M$ is a vector of $N\equiv J\times K$ masses or SSP normalizations,
+$S$ is a matrix of $N \times L$ of the SSP spectra
+.
+% ---- Totally free dust ---
+%, $A$ is an $N \times N$ diagonal matrix of opacities that normalize the attenuation curves,
+%$R$ is an $N \times L$ matrix of effective attenuation curves,
+%and $\cdot$ represents the elementwise Hadamard product.
+% --- Fixed attenuation curve ----
+%, $A$ is an $N \times 1$ column vector of opacities that normalize the attenuation curves,
+%$R$ is an $1 \times L$ vector giving the effective attenuation curve,
+%and $\cdot$ represents the elementwise Hadamard product.
+
+\subsection{SFH Uncertainty Bounds}
+It is tempting, given the matrix form of Eq. \ref{eq:sps-matrix}, to infer the SFH by solving for the parameters of interest $M$ using linear algebra techiques.
+Indeed, much fruitful work has been done along these lines.
+There are several issues that arise when employing such inversion techniques.
+\begin{itemize}
+
+\item The SSP matrix $S$ should also include the effects of dust, velocity, resolution, and possibly emission lines.
+
+\item The elements of $M$ must be non-negative to make physical sense.
+
+\item Observational uncertainty on the vector $F$ can have strong effects on the inferred vector $M$.  This is at least partially due to the strong similarity between SSPs of similar age or metallicity.  This ismilarity can in turn induce strong (SFH dependant) degeneracies in the recovered parameters $M$.
+
+\end{itemize}
+
+\subsection{Optimal Time Resolution}
+The definition of resolution is really quite fuzzy itself.
+The definition of optimal is also somewhat uncertain in this context.
+
+\section{Results}
+
+\subsection{Scenarios}
+
+\subsection{Validation with MCMC}
+
+\section{Discussion}
+
+
+\acknowledgements
+This research made extensive use of NASA's Astrophysics Data System Bibliographic Services. 
+In large part, analysis and plots presented in this paper utilized iPython and
+packages from NumPy, SciPy, and Matplotlib \citep[][]{hunter2007, oliphant2007,
+perez2007} as well as python-FSPS (\url{http:://github.com/dfm/python-fsps}).
+
+\newcommand{\arxiv}[1]{\href{http://arxiv.org/abs/#1}{arXiv:#1}}
+\begin{thebibliography}{}\raggedright
+
+\bibitem[Conroy \etal(2009)]{fsps} 
+Conroy, C., Gunn, J.~E., \& White, M.\ 2009, \apj, 699, 486 
+
+\bibitem[Conroy \& Gunn(2010)]{fsps_cal} 
+Conroy, C., \& Gunn, J.~E.\ 2010, \apj, 712, 833 
+
+
+\nibitem[Gorman \& Hero(1990)]{gorman90} 
+J. D. Gorman and A. O. Hero. Lower bounds for parametric estimation with constraints. IEEE Trans. Info. Theory, 36(6):1285–1301, November 1990.
+
+\bibitem[Ocvirk (2006)]{ocvirk06} 
+Ocvirk, P. 2006 \mnras
+
+\bibitem[Tojeiro \etal(2007)]{tojeiro07} 
+Tojeiro, R. 2007 \mnras
+
+
+\end{thebibliography}
+
+\end{document}

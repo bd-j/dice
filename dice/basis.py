@@ -16,10 +16,10 @@ def rectify_basis(wave, spectra, wlow=0, whigh=np.inf,
         return np.array([f.wave_effective for f in flist]), 10**(-0.4 * sed)
 
     if outwave is not None:
-        func = interpolate(wave, spectra, axis=-1)
-        spectra = func(outwave)
+        onedinterp = interpolate(wave, spectra, axis=-1)
+        spectra = onedinterp(outwave)
         wave = outwave
-    
+
     g = (wave >= wlow) & (wave <= whigh)
     for (lo, hi) in exclude:
         g = g & ((wave < lo) | (wave > hi))

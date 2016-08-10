@@ -95,7 +95,7 @@ These SSPs are the $s_\lambda(t, Z)$ for $J$ specific values of $t$ (indexed as 
 They are calculated using isochrones and stellar spectral libraries.
 The sum is then
 \begin{eqnarray}
-F_\lambda & = & \sum_{j=1}^J \, \sum_{k=1}^{K} \, m_{j,k} \, s_{\lambda, j,k} \, e^{-\tau_{j,k}} \\
+F_\lambda & = & \sum_{j=1}^J \, \sum_{k=1}^{K} \, m_{j,k} \, s_{\lambda, j,k} \, e^{-\tau_{\lambda, j,k}} \\
 s_{\lambda, j,k} & = & s_\lambda(t_j, Z_k)
 \end{eqnarray}
 where the $m_{j,k}$ are the masses or \emph{weights} of each SSP.  
@@ -177,6 +177,19 @@ These are the diagonal terms of the fisher information matrix.  The off diagonal
 \end{eqnarray}
 Then we take the negative matrix inverse of the full Fisher information matrix to obtain the Cramer-Rao bound on the uncertainties on the parameters, including the effect of parameter covariances.
 
+In fact, this is just the basic equation for parameter uncertainties in a weighted linear least-square fit.
+
+
+\underline{\textsc{Dust}}:
+If we include dust attenuation then we have to write the derivatives of the mean function with respect to the dust parameters.
+We assume here that the effective attenuation curve \emph{shape} is fixed for a given age (and metallicity), but that the normalization can be age (or metallicity) dependent.
+That is, 
+\begin{eqnarray}
+\tau_{i}(\lambda)  & \sim & A_{V, i} \, R_{i}(\lambda)\\
+\end{eqnarray}
+
+The partial derivatives of the mean spectrum with respect to these parameters is 
+
 
 \underline{\textsc{An Example}}:  
 The equations above are actually quite simple.  
@@ -225,7 +238,7 @@ we apply the linear transformation $R$ to the variance-ovariance matrix C
 This substantially decreases the S/N requirement to reach a certain precision.  
 We show also the covariances.
 How do we choose the binning scheme?  
-Based on linear independence of the SSPs?
+Based on linear independence of the SSPs? Or on reaching a precision of one in each bin?
 
 \begin{figure*}[h!]
 \includegraphics[width=0.5 \textwidth]{../figures/const_crb.pdf}
