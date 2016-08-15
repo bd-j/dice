@@ -41,10 +41,10 @@ def plot_covariances(axes, crb, invals, unit='', ptiles=[0.683, 0.955],
 
     n = crb.shape[0]
     for i in range(n):
-        ax = axes[i,i]
+        dax = axes[i,i]
         dx = nsigma * np.sqrt(crb[i,i])
         x = np.linspace(max(invals[i] - dx, 0), invals[i] + dx, nbin)
-        ax.plot(x, np.exp(gauss(x, crb[i,i], mu=invals[i])))
+        dax.plot(x, np.exp(gauss(x, crb[i,i], mu=invals[i])))
         for j in range(i+1, n):
             ax = axes[j, i]
             dy = nsigma * np.sqrt(crb[j,j])
@@ -54,6 +54,7 @@ def plot_covariances(axes, crb, invals, unit='', ptiles=[0.683, 0.955],
             pdf = twod_gauss(x, y, covar, mu=mean)
             levels = -cdf_to_level(np.array(ptiles))
             ax.contour(pdf[0], pdf[1], pdf[2], levels=levels, colors=color)
+            dax.set_xlim(ax.get_xlim())
     return axes
             
 
@@ -83,7 +84,7 @@ def multigaussian(X, Sigma, mu=0., intervals=True, **extras):
     return lnp, log_det
 
 def gauss(X, var, mu=0.):
-    x = (X - mu) / var
+    x = (X - mu) / np.sqrt(var)
     return -0.5 * x**2
 
 def twod_gauss(x, y, covar, **kwargs):

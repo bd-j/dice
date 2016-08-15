@@ -44,7 +44,7 @@ if __name__ == "__main__":
               'covariances': True,
               'renormalize': False,
               'regularize': False,
-              'rebin': 6,
+              'rebin': 8,
               }
 
     plabel = '\n$S/N=${snr:.0f}\n$tau$={tau}, $tage=${tage}'.format(**params)
@@ -96,6 +96,8 @@ if __name__ == "__main__":
     pl.rcParams['contour.negative_linestyle'] = 'solid'
     nb = len(sfr)
     cfig, caxes = pl.subplots(nb, nb)
-    caxes = plot_covariances(caxes, crb, masses/transform, unit=unit, nsigma=5, ptiles=[0.683, 0.955])
+    caxes = plot_covariances(caxes, crb, masses/transform, unit=unit,
+                             nbin=500, nsigma=5, ptiles=[0.683, 0.955])
     [ax.set_visible(False) for ax in caxes.flat if ax.has_data() is False]
+    [ax.tick_params(axis='both', which='major', labelsize=7) for ax in caxes.flat]
     pl.show()

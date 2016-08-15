@@ -5,6 +5,17 @@ def fisher_matrix(spectra, masses, snr=100, transformation=None,
                   unc=None, sigma_contribution=False, **extras):
     """ Calculate the Fisher information Matrix.  Currently does not work for
     anything other than uncorrelated gaussian errors.
+
+    :param spectra:
+        ndarray of shape (nbasis, nwave)
+
+    :param masses:
+        fiducial masses used to normalize each components, ndarray of shape
+        (nbasis,)
+
+    :param transformation:
+        Multiplies the spectra to transform the normalization parameter.
+        ndarray of shape (nbasis,)
     """
     mu = np.dot(masses, spectra)
     if unc is None:
@@ -21,13 +32,33 @@ def fisher_matrix(spectra, masses, snr=100, transformation=None,
     # Do it out explicitly?  I think this is the same as
     #for i in range(nage):
     #    for j in range(nage):
-    #        fisher[i, j] = np.dot(partial_mu[i,:], np.dot(Sigma, partial_mu[j,:].T))
+    #        fisher[i, j] = np.dot(partial_mu[i,:], np.dot(invSigma, partial_mu[j,:].T))
 
     if sigma_contribution:
         partial_sigma = 2 * unc * partial_mu / snr
         raise(NotImplementedError)
 
     return fisher, mu
+
+
+def fisher_matrix_dust(spectra, masses, dust_curves=None, A_V=None):
+    """
+    :param dust_curves:
+       dust attenuation curves A_lambda/A_V, ndarray of shape (nbasis, nwave) or just (nwave,)
+    """
+    R = np.atleast_2d(dust_curves) # nbasis x nwave or 1 x nwave
+    att = np.exp(-np.atleast_2d(A_V).T * R) #nbasis x nwave or 1 x nwave
+    fluxes = spectra * att # nbasis x nwave
+
+    mu = np.dot(masses, fluxes) # nwave
+    partial_mu_partial_m = fluxes # nbasis x nwave
+    if att.shape[0] > 1:
+        partial_mu_partial_A = R * masses[:, None] * fluxes # nbasis x nwave
+    else:
+        partial_mu_partial_A = R * np.atleast_2d(mu) # 1 x nwave
+
+    partial_mu = np.vstack([partial_mu_partial_m, partial_mu_partial_A])
+
 
 def fisher_matrix_old(spectra, masses, snr=100, unc=None,
                       sigma_contribution=False, **extras):

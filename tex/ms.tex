@@ -59,7 +59,7 @@ Galaxy spectra carry information about the stellar and dust content of galaxies,
 \section{Methodology}
 
 \subsection{Population Synthesis Formalism}
-Here we're going to define some terms and introduce notation. We define SFH as the function 
+Here we're going to define some terms and introduce notation. We define the SFH as the function 
 \begin{eqnarray}
 \mathrm{SFH} & \equiv & \psi(t, Z)
 \end{eqnarray}
@@ -101,6 +101,10 @@ $S$ is a matrix of $N \times L$ of the SSP spectra
 %$R$ is an $1 \times L$ vector giving the effective attenuation curve,
 %and $\cdot$ represents the elementwise Hadamard product.
 
+\subsection{The Likelihood}
+
+
+
 \subsection{SFH Uncertainty Bounds}
 It is tempting, given the matrix form of Eq. \ref{eq:sps-matrix}, to infer the SFH by solving for the parameters of interest $M$ using linear algebra techiques.
 Indeed, much fruitful work has been done along these lines.
@@ -111,13 +115,21 @@ There are several issues that arise when employing such inversion techniques.
 
 \item The elements of $M$ must be non-negative to make physical sense.
 
-\item Observational uncertainty on the vector $F$ can have strong effects on the inferred vector $M$.  This is at least partially due to the strong similarity between SSPs of similar age or metallicity.  This ismilarity can in turn induce strong (SFH dependant) degeneracies in the recovered parameters $M$.
-
+\item Observational uncertainty on the vector $F$ can have strong effects on the inferred vector $M$.  
+This is at least partially due to the strong similarity between SSPs of similar age or metallicity.  
+This similarity can in turn induce strong (SFH dependant) degeneracies in the recovered parameters $M$.
 \end{itemize}
+These complexities make a precise determination of the posterior PDF for the parameters difficult to work out analytically.
+In general, MCMC techniques are required to explore the posterior space, but this can be time consuming.
+However, we can obtain \emph{lower limits} on the uncertainties of the recovered parameters.
+
+This can be accomplished by computing the Fisher information matrix (FIM), and inverting it to 
 
 \subsection{Optimal Time Resolution}
+
 The definition of resolution is really quite fuzzy itself.
 The definition of optimal is also somewhat uncertain in this context.
+How many bins can you get?  What bins are they?
 
 \section{Results}
 
@@ -126,6 +138,9 @@ The definition of optimal is also somewhat uncertain in this context.
 \subsection{Validation with MCMC}
 
 \section{Discussion}
+
+Assumes model perfection.
+
 
 
 \acknowledgements
