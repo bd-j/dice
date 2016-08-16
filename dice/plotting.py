@@ -17,7 +17,6 @@ def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
             linewidth=2)
     ax.step(allages,  np.append(invals, 0), where='post', label='Input',
             linewidth=2)
-    ax.legend(loc=0)
     
     ax.axhline(1.0, linestyle=':', color='k', linewidth=1.5)
     ax.set_xlabel('lookback time (log yrs)')
@@ -55,6 +54,13 @@ def plot_covariances(axes, crb, invals, unit='', ptiles=[0.683, 0.955],
             levels = -cdf_to_level(np.array(ptiles))
             ax.contour(pdf[0], pdf[1], pdf[2], levels=levels, colors=color)
             dax.set_xlim(ax.get_xlim())
+            # Axis label foo
+            if j < (n-1):
+                ax.set_xticklabels('')
+                dax.set_xticklabels('')
+            if i > 0:
+                ax.set_yticklabels('')
+                dax.set_yticklabels('')
     return axes
             
 

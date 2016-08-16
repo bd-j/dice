@@ -28,6 +28,12 @@ def analytic_transformation(crb, rebin_matrix, mu=None, **extras):
     return Sigma
 
 
+def nset(nssp, nbin):
+    from math import factorial
+    nset = factorial(nssp + nbin - 1) / (factorial(nssp) * factorial(nbin - 1))
+    return nset
+
+
 def build_rebin(oldedges, newedges):
     nnew, nold = len(newedges)-1, len(oldedges)-1
     rmatrix = np.zeros([nnew, nold])

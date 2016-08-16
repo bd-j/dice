@@ -27,7 +27,7 @@ if __name__ == "__main__":
               'get_basis': get_basis,
               'sfh': exponential,
               'power': 2,
-              'tau': 5.,
+              'tau': 1.,
               'tage': 10.0,
               'filters': None, #filters,
               'wlow': 3800,
@@ -49,8 +49,8 @@ if __name__ == "__main__":
     sfh = params.pop('sfh')
 
     allages = binedges[::params['rebin']]
+    allages = np.insert(allages, 0, 4)
     if allages[-1] < binedges[-1]:
-        allages = np.insert(allages, 0, 4)
         allages = np.append(allages, binedges[-1])
     #allages = np.array([0.0, 7.5, 8.0, 8.5, 9.0, 9.5, 9.7, 9.9, np.log10(13.6e9)])
     #allages = np.array([0.0, 8.0, 8.5, 9.0, 9.5, np.log10(13.6e9)]) #Leja bins
@@ -84,6 +84,7 @@ if __name__ == "__main__":
             transform=ax.transAxes, fontsize=14,
             verticalalignment='top', bbox=props)
     ax.set_ylim(1e-2, 3e1)
+    ax.legend(loc='lower left')
 
     # Covariances
     pl.rcParams['contour.negative_linestyle'] = 'solid'
@@ -91,4 +92,9 @@ if __name__ == "__main__":
     cfig, caxes = pl.subplots(nb, nb)
     caxes = plot_covariances(caxes, crb, masses/transform, unit=unit, nsigma=5, ptiles=[0.683, 0.955])
     [ax.set_visible(False) for ax in caxes.flat if ax.has_data() is False]
-    pl.show()
+    tickparams = {'labelsize': 7, 'length': 1, 'width': 1}
+    [ax.tick_params(**tickparams) for ax in caxes.flat]
+
+    #pl.show()
+    fig.savefig('spec_tau={tau:3.1f}_tage={tage:3.1f}_snr={snr:.0f}_unc.pdf'.format(**params))
+    cfig.savefig('spec_tau={tau:3.1f}_tage={tage:3.1f}_snr={snr:.0f}_corner.pdf'.format(**params))
