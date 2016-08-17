@@ -6,17 +6,18 @@ from scipy.linalg import cho_factor, cho_solve
 from numpy.core.umath_tests import inner1d
 
 
-def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
-             **kwargs):
+def plot_sfh(ax, allages, crb, truths=None, unit='', filters=None,
+             plabel='Uncertainty', **kwargs):
     """Marginalized SFH uncertainties and input SFR.
     """
     #fig, ax = pl.subplots()
     #ax.plot((allages[1:] + allages[:-1])/2., np.sqrt(np.diag(crb)), '-o')
     punc = np.sqrt(np.diag(crb))
-    ax.step(allages,  np.append(punc, 0), where='post', label='Uncertainty',
+    ax.step(allages,  np.append(punc, 0), where='post', label=plabel,
             linewidth=2)
-    ax.step(allages,  np.append(invals, 0), where='post', label='Input',
-            linewidth=2)
+    if truths is not None:
+        ax.step(allages,  np.append(truths, 0), where='post', label='Input',
+                linewidth=2)
     
     ax.axhline(1.0, linestyle=':', color='k', linewidth=1.5)
     ax.set_xlabel('lookback time (log yrs)')
@@ -34,21 +35,21 @@ def plot_sfh(ax, allages, crb, invals, unit='', filters=None, plabel=None,
     return ax
 
 
-def plot_covariances(axes, crb, invals, unit='', ptiles=[0.683, 0.955],
-                     filters=None, plabel=None, color='red',
+def plot_covariances(axes, crb, truths, unit='', ptiles=[0.683, 0.955],
+                     filters=None, color='red',
                      nbin=100, nsigma=4., **extras):
 
     n = crb.shape[0]
     for i in range(n):
         dax = axes[i,i]
         dx = nsigma * np.sqrt(crb[i,i])
-        x = np.linspace(max(invals[i] - dx, 0), invals[i] + dx, nbin)
-        dax.plot(x, np.exp(gauss(x, crb[i,i], mu=invals[i])))
+        x = np.linspace(max(truths[i] - dx, 0), truths[i] + dx, nbin)
+        dax.plot(x, np.exp(gauss(x, crb[i,i], mu=truths[i])))
         for j in range(i+1, n):
             ax = axes[j, i]
             dy = nsigma * np.sqrt(crb[j,j])
-            y = np.linspace(max(invals[j] - dy, 0), invals[j] + dy, nbin)
-            mean = np.array([invals[i], invals[j]])
+            y = np.linspace(max(truths[j] - dy, 0), truths[j] + dy, nbin)
+            mean = np.array([truths[i], truths[j]])
             covar = np.array([[crb[i,i], crb[i,j]], [crb[j,i], crb[j,j]]])
             pdf = twod_gauss(x, y, covar, mu=mean)
             levels = -cdf_to_level(np.array(ptiles))

@@ -17,6 +17,12 @@ def fisher_matrix(spectra, masses, snr=100, transformation=None,
     :param transformation: (optional)
         Multiplies the spectra to transform the normalization parameter.
         ndarray of shape (nbasis,)
+
+    :param dust_curves:
+       Dust attenuation curves A_lambda/A_V, ndarray of shape (nbasis, nwave) or just (nwave,)
+
+    :param A_V:
+        Normalization of the dust curves. scalar or ndarray of shape (nbasis,).
     """
 
     # Attenuate SSPs by dust
