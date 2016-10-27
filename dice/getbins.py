@@ -7,7 +7,7 @@ from .crbound import cramer_rao_bound
 from .sfhs import *
 
 
-def analytic_transformation(crb, rebin_matrix, mu=None, **extras):
+def rebin_sfh(rebin_matrix, masses=None, covar=None, **extras):
     """Compute the covariance matrix of a linear transformation of the input
     multivariate gaussian describe by `crb`.  The linear transformation is
     given by `rebin_matrix` and if filled with ones and zeros amounts to
@@ -22,10 +22,12 @@ def analytic_transformation(crb, rebin_matrix, mu=None, **extras):
         An array of shape (nnew, nold)
     """
 
-    Sigma = np.dot(rebin_matrix, np.dot(crb, rebin_matrix.T))
-    if mu is not None:
-        return Sigma, np.dot(rebin_matrix, mu)
-    return Sigma
+    mu, Sigma = None, None
+    if covar is not None:
+        Sigma = np.dot(rebin_matrix, np.dot(covar, rebin_matrix.T))
+    if masses is not None:
+        mu = np.dot(rebin_matrix, masses)
+    return mu, Sigma
 
 
 def nset(nssp, nbin):
@@ -38,7 +40,7 @@ def build_rebin(oldedges, newedges):
     nnew, nold = len(newedges)-1, len(oldedges)-1
     rmatrix = np.zeros([nnew, nold])
     for i, new in enumerate(newedges[:-1]):
-        assert new in oldedges, '{} not in {}'.format(new, oldedges)
+        #assert True in np.isclose(new, oldedges), '{} not in {}'.format(new, oldedges)
         #print(np.searchsorted(oldedges, newedges[i:i+2]), newedges[i:i+2])
         ilo, ihi = np.searchsorted(oldedges, newedges[i:i+2])
         #print(ilo, ihi, oldedges[ilo], oldedges[ihi])

@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     # Marginalized uncertainties
     fig, ax = pl.subplots()
-    ax = plot_sfh(ax, allages, crb, masses/transform, unit=unit, **params)
+    ax = plot_sfh(ax, allages, crb, truths=masses/transform, unit=unit, **params)
     props = dict(boxstyle='round', facecolor='w', alpha=0.5)
     ax.text(0.05, 0.95, plabel,
             transform=ax.transAxes, fontsize=14,

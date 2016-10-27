@@ -19,13 +19,16 @@ def fisher_matrix(spectra, masses, snr=100, transformation=None,
         ndarray of shape (nbasis,)
 
     :param dust_curves:
-       Dust attenuation curves A_lambda/A_V, ndarray of shape (nbasis, nwave) or just (nwave,)
+       Dust attenuation curves A_lambda/A_V, ndarray of shape (nbasis, nwave)
+       or just (nwave,)
 
     :param A_V:
-        Normalization of the dust curves. scalar or ndarray of shape (nbasis,).
+        Normalization of the dust curves. If dust_curves is one-dimensional
+        then this can be scalar or length 1, otherwise it should be length
+        (nbasis,)
     """
 
-    # Attenuate SSPs by dust
+    # Attenuate SSPs by dust (or not)
     if dust_curves is not None:
         R = np.atleast_2d(dust_curves) # nbasis x nwave or 1 x nwave
         att = np.exp(-np.atleast_2d(A_V).T * R) #nbasis x nwave or 1 x nwave
@@ -157,6 +160,11 @@ def cramer_rao_bound(spectra, masses, snr=100, covariances=True,
 
 
 def svd_comp(spectra, masses, snr=100, realizations=0):
+    """Get `principal components` of the SSP matrix, and project the input
+    spectrum onto these components to get the amplitudes of the principal
+    components.  Compare these amplitudes to the average unceertainty, and
+    optionally compute the amplitudes for several realizations of the noise
+    """
     f = np.dot(masses, spectra)
     U, w, Vt = np.linalg.svd(spectra.T)
 

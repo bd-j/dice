@@ -27,6 +27,12 @@
 \newcommand{\given}{\,|\,}
 \renewcommand{\det}[1]{||{#1}||}
 
+\newcommand{\fim}{Fisher Information Matrix}
+% code references
+\newcommand{\stecmap}{\textsc{STECMAP}}
+\newcommand{\vespa}{\textsc{VESPA}}
+\newcommand{\fsps}{\textsc{FSPS}}
+
 % affiliation marks; edit with care
 \newcommand{\cfa}{1}
 
@@ -50,6 +56,7 @@
 
 \begin{abstract}
 Galaxy spectra carry information about the stellar and dust content of galaxies, ultimately relating to the star-formation history of galaxies.
+However, quantification of this information content is difficult to achieve.
 
 \end{abstract}
 
@@ -118,21 +125,132 @@ There are several issues that arise when employing such inversion techniques.
 \item Observational uncertainty on the vector $F$ can have strong effects on the inferred vector $M$.  
 This is at least partially due to the strong similarity between SSPs of similar age or metallicity.  
 This similarity can in turn induce strong (SFH dependant) degeneracies in the recovered parameters $M$.
+Formally, the condition-number of the matrix $M$ is very large, leading to a poorly conditioned inversion problem.
 \end{itemize}
 These complexities make a precise determination of the posterior PDF for the parameters difficult to work out analytically.
 In general, MCMC techniques are required to explore the posterior space, but this can be time consuming.
 However, we can obtain \emph{lower limits} on the uncertainties of the recovered parameters.
 
-This can be accomplished by computing the Fisher information matrix (FIM), and inverting it to 
+This can be accomplished by computing the \fim, and inverting it to obtain the marginalized uncertainty on the mass or SFR in any given bin.
+
+\subsection{Fisher Matrix and Cramer-Rao bound}
+
 
 \subsection{Optimal Time Resolution}
+The definition of resolution is really quite fuzzy itself. 
+Resolution is typically defined as the minimum separation where you can still distinguish two separate objects.  
+However, ``distinguish'' is never really defined, and there are implicit assumptions on what is meant by ``object'', e.g. that they are of equal amplitude.
+The S/N is also usually not specified, though it is key to the ability to distinguish components.
+In spectroscopy the resolution is typically taken to mean the FWHM of the line-spread function.
+In photometry the resolution is taken to be the FWHM of the point spread function.
+By analogy, we might consider the \emph{age-spread function}.
+However, while the point-spread function and line-spread function are determined by physical properties of the detector, 
+giving the pdf for the detected wavelength or position of a photon with a given input wavelength or position, 
+the age-spread function is linked intrinsically to the inference method, the data, and the S/N.
+\begin{eqnarray}
+p(\lambda \given \lambda_0) & = & LSF \\
+p(t \given t_0, d, \sigma) & = & ASF\\
+\end{eqnarray}
 
-The definition of resolution is really quite fuzzy itself.
 The definition of optimal is also somewhat uncertain in this context.
-How many bins can you get?  What bins are they?
+
+\section{Results for the complete solution}
+In this section we compute the \fim and the \crbound for the SFH at the native time resolution of the isochrones $\Delta log t = 0.05$
+We assume that the SFR within each of these intervals is constant.
+The definition of the \fim given above requires that we compute the likelihood gradient at a specific set of parameters $m$, 
+and that we assume a S/N for each data point, as well as a resolution and wavelength range.
+
+Because of the availability of spectral libraries, we choose a resolution of 2.54\AA FWHM and a wavelength range of 3600-7200\AA.
+We choose 3 different SFHs to explore the impact of the SFH on the uncertainty bounds.
+These SFHs are
+\begin{itemize}
+\item $\psi(t) \sim e^{(13.7-t)/1.0}$
+\item $\psi(t) \sim e^{(13.7-t)/10.0}$
+\item  $\psi(t) \sim e^{(5-t)/10.0}$
+\end{itemize}
+corresponding to exponential SFHs with different ages and exponential decay rates.
+
+
+
+
+\section{What Priors?}
+The previous section demonstrated that it is impossible to obtain meaningful constraints on the full star-formation history from spectra of even vaguely realistic signal-to-noise ratio.
+This is due to the poorly conditioned matrix $M$, which ultimately arises from the extreme similarity of SSPs close in time (and/or metallicity).
+The question then becomes: in order to make progress and obtain any useful constraints at all, what \emph{prior} information do we have to assume?
+This question is soimetimes formulated in terms of the necessary \emph{regularization} of the problem.
+It is also, in some sense, a re-formulation of the question ``How many bins can I constrain?'' or ``what time resolution is possible?'' {\color{blue} reword, better phrasing.}
+In this section we will discuss several possible priors for the SFH, their implications, and their utility in constraining the inversion problem.
+
+\subsection{Parametric SFH}
+The oldest type of priors are related to parameterized functional forms for the SFH.  
+These were at first exponentially decaying star formation rates \citep{tinsley}, also called $\tau$-models 
+motivated by consideration of of closed box evolution with a constant star-formation efficiency, and by their ability to explain the data.
+Additional parameteric forms include 
+so called delayed-$\tau$ models that avoid the rapid onset,
+constant SFR models,
+single age burst models,
+and various linear combination thereof.
+Recently, SFHs with a parameterized rise time and fall time have also been proposed \citep{pacifici}
+
+The drawback of this type of prior is precisely that it does strongly constrain the form of the SFH, removing the possibility of the data preferring a different parameteric form, and complicating the interpretation of the constraints provided by the data itself (though the likelihood) on the SFH.
+That is, with a strong enough parametric prior, the instantaneous present-day SFR can be well-constrained with only a single color in the near-infrared, which is clearly ludicrous.
+
+\subsection{Step-wise constant SFR}
+One common prior is to assume that the SFH is piecewise constant over specified time intervals, but that the change in SFR betwen time intervals is completely unconstrained (except for the constraint that the SFR be non-negative)
+This is often referred to as a non-parameteric SFH, though in fact the parameters are the number of bins, their precise edges in time, and the amplitude of each bin.
+This kind of prior is motivated by a desire to not enforce a particular shape on the SFH, as was done with the parameteric SFH priors discussed previously, and to ``let the data decide''.
+
+The drawback of this prior comes with the specification of the number and precise edges of the time intervals in which the SFR is assumed constant.
+If these intervals are fixed, they amount to a strong prior on the form of the SFH with following properties
+\begin{eqnarray}
+p(SFR(t_1) \given SFR(t_2)) & = & \delta(SFR(t_1)) \\
+p(SFR(t_1) \given SFR(t_2)) & = & U(0, \inf)
+\end{eqnarray}
+where x is y.
+This has the property that the prior on the SFR is extremely sensitive to time, since if $t_1$ is near the edge of one of the spcified time intervals then $p(SFR(t_1+\epsilon))$ is dramatically different than $p(SFR(t_1))$.
+
+Another drawback concerns the suitability of this type of prior in real systems.  
+Bursts and quenches may very well occur in real systems
+If they occur on timescales or at times that aren't well matched to your bins then the inference will be biased.
+Consider a galaxy which rapidly quenches near the midpoint of a given time interval.  
+The inferred SFH with fixed time intervals will still show constant SFR across this bin, with the SFR biased low for the portion of the interval before the quench and biased high for the portion after quench.
+Another problematic situation can occur when a burst occurs near the edge of an interval, or straddles the edge of an interval.
+{\color{blue} discuss outshining effects}
+
+One way to explore these issues is to compute the \crbound with wide bins and both with and without marginalization over the intra-bin SFH.
+In figure \ref{fig} we show that the constrints on the SFR in each wide bin, marginalized over the intra-bin SFH, is nearly as bad as the constraints on the narrow, native resolution bins.
+This is because the marginalization must take into account the possibility 
+
+These drawbacks can be mitigated by allowing the number and edges of the bins to be inferred as well.
+{\color{blue} Discuss issues with trans-dimensional methods.  Discuss 'bin-splitting' algorithms like \vespa}
+
+\subsection{Gradient priors}
+A prior on the gradient or derivative of the SFR between adjacent time bins can be used to regularize the solution without explicitly parameterizing the form of the SFH.
+This prior was proposed and implemented by \citet{stecmap} as part of the \stecmap code, given as a regularization term in the required matrix inversion.
+\begin{eqnarray}
+ln p(SFR(t_1) \given SFR(t_2)) =  - K \, dSFR/\Delta t
+\end{eqnarray}
+where $K$ is a tunable parameter adjusting the amount of penalty, and $t_1$ and $t_2$ are adjacent time bins.
+It amounts to a prior on the smoothness of the SFH.
+
+However, it can be difficult to relate this prior directly to a timescale or indeed to a physically interpretable mechanism.
+Also, it is difficult to estimate the strength of the regularization or the penalty for large gradients that is required for a given dataset without running expensive simulations.
+
+
+\subsection{``Dynamical'' priors}
+In this section we propose a new prior similar to the gradient prior but somewhat more interpretable in terms of timescales.
+This prior has the form
+\begin{eqnarray}
+p(SFR(t_1) \given SFR(t_2)) & = & \mathcal{N}(dSFR | 0, \sigma(\Delta t)) \\
+\Delta t & = & | t_1 - t_2 | \\
+dSFR & = & SFR(t_1) - SFR(t_2)
+\end{eqnarray}
+
+It is easy to incorporate this prior into the \crbound formalism above, since it is, in effect, a prior on the covariance between 
+
+{\color{\blue} discuss the Kelson martingale stuff in this framework}
 
 \section{Results}
-
 \subsection{Scenarios}
 
 \subsection{Validation with MCMC}
