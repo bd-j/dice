@@ -6,10 +6,13 @@ except:
     pass
 
 
-def rectify_basis(wave, spectra, wlow=0, whigh=np.inf,
+def rectify_basis(inwave, spectra, wlow=0, whigh=np.inf, redshift=0.0,
                   exclude=[], outwave=None, filters=None, **extras):
     """Mask a spectral basis using lists of include and exclude ranges
     """
+
+    wave = inwave * (1 + redshift)
+    
     if filters is not None:
         flist = observate.load_filters(filters)
         sed = observate.getSED(wave, spectra, filterlist=flist)
@@ -31,7 +34,10 @@ def get_binned_spectral_basis(sps, agebins, zbins=[0.], **kwargs):
     :param agebins:
         Array giving lower and upper log(age) limits for each bin, of shape
         (nbin, 2)
-        
+
+    :returns spectra:
+        Array of shape nbin, nspec giving the partial spectra of each bin (in
+        L/formed_mass)
     """
     for z in zbins:
         sps.params['logzsol'] = z
